@@ -1,0 +1,35 @@
+{
+	"name": "node-devcontainer",
+	// TypeScript対応のベースイメージ
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+	// 開発に必要なツールやライブラリをインストール
+	"features": {
+		"ghcr.io/devcontainers/features/java": {},
+		"ghcr.io/devcontainers/features/github-cli": {},
+		"./features/claude-code": {},
+		"./features/google-cloud-cli": {},
+		"./features/playwright-deps": {}
+	},
+	// Fastifyのデフォルトポートをフォワード
+	"forwardPorts": [3000],
+	// 環境変数の設定
+	"runArgs": ["--env-file", ".devcontainer/devcontainer.env"],
+	// ホストの設定ディレクトリをマウント
+	"mounts": [
+		"source=${localEnv:HOME}/.config/gh,target=/home/node/.config/gh,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.config/gcloud,target=/home/node/.config/gcloud,type=bind,consistency=cached",
+		"source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind,consistency=cached"
+	],
+	// 拡張機能や設定のカスタマイズ
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"biomejs.biome"
+			],
+			"settings": {
+				"editor.formatOnSave": true,
+				"editor.defaultFormatter": "biomejs.biome"
+			}
+		}
+	}
+}

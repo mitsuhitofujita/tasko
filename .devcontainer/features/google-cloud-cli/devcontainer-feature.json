@@ -1,0 +1,7 @@
+{
+	"id": "google-cloud-cli",
+	"version": "0.0.1",
+	"name": "Google Cloud CLI",
+	"description": "Installs the Google Cloud CLI",
+	"installsAfter": []
+}

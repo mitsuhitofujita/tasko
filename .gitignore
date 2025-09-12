@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+*.env
+.pnpm-store/
+test-results/
+playwright-report/
+.playwright-mcp/

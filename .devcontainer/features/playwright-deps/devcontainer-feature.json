@@ -1,0 +1,7 @@
+{
+	"id": "playwright-deps",
+	"version": "0.0.1",
+	"name": "Playwright Dependencies",
+	"description": "Installs the Playwright testing framework dependencies",
+	"installsAfter": []
+}
