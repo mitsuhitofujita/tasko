@@ -81,7 +81,22 @@ class SessionStore {
 			return null;
 		}
 
-		const session = sessionDoc.data() as Session;
+		const sessionData = sessionDoc.data();
+		if (!sessionData) {
+			return null;
+		}
+
+		// Convert Firestore timestamps to Date objects
+		const session: Session = {
+			userId: sessionData.userId,
+			createdAt: sessionData.createdAt.toDate(),
+			expiresAt: sessionData.expiresAt.toDate(),
+			lastSeenAt: sessionData.lastSeenAt.toDate(),
+			csrfSecret: sessionData.csrfSecret,
+			ipHash: sessionData.ipHash,
+			uaHash: sessionData.uaHash,
+		};
+
 		if (session.expiresAt.getTime() < Date.now()) {
 			await this.deleteSession(sessionId);
 			return null;
@@ -124,9 +139,10 @@ class SessionStore {
 
 		let user: User;
 		if (userDoc.exists) {
+			const existingUserData = userDoc.data();
 			user = {
 				...userData,
-				createdAt: (userDoc.data() as User).createdAt,
+				createdAt: existingUserData?.createdAt?.toDate() || now,
 				updatedAt: now,
 				lastLoginAt: now,
 			};
@@ -145,7 +161,26 @@ class SessionStore {
 
 	private async getUser(userId: string): Promise<User | null> {
 		const userDoc = await db.collection("users").doc(userId).get();
-		return userDoc.exists ? (userDoc.data() as User) : null;
+		if (!userDoc.exists) {
+			return null;
+		}
+
+		const userData = userDoc.data();
+		if (!userData) {
+			return null;
+		}
+
+		// Convert Firestore timestamps to Date objects
+		return {
+			userId: userData.userId,
+			name: userData.name,
+			email: userData.email,
+			emailVerified: userData.emailVerified,
+			picture: userData.picture,
+			createdAt: userData.createdAt.toDate(),
+			updatedAt: userData.updatedAt.toDate(),
+			lastLoginAt: userData.lastLoginAt.toDate(),
+		};
 	}
 
 	private generateSessionId(): string {
