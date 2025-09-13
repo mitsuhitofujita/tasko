@@ -23,9 +23,7 @@
 	// 拡張機能や設定のカスタマイズ
 	"customizations": {
 		"vscode": {
-			"extensions": [
-				"biomejs.biome"
-			],
+			"extensions": ["biomejs.biome", "editorconfig.editorconfig"],
 			"settings": {
 				"editor.formatOnSave": true,
 				"editor.defaultFormatter": "biomejs.biome"
