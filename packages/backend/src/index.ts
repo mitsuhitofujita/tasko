@@ -1,7 +1,7 @@
-import fastify from "fastify";
-import type { FastifyReply } from "fastify";
-import path from "path";
+import path from "node:path";
 import fastifyStatic from "@fastify/static";
+import type { FastifyReply } from "fastify";
+import fastify from "fastify";
 
 const server = fastify();
 

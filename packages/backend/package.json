@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"check": "biome check src --write",
+		"check": "biome check src --write && tsc -p tsconfig.json --noEmit",
 		"dev": "tsx watch src/index.ts",
 		"build": "tsc -p tsconfig.json",
 		"start": "node dist/index.js"

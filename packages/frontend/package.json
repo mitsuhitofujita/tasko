@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"check": "biome check src --write",
+		"check": "biome check src --write && tsc -b --noEmit",
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview"
