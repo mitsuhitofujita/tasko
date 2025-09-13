@@ -4,7 +4,7 @@ import fastifyCors from "@fastify/cors";
 import fastifyStatic from "@fastify/static";
 import type { FastifyReply } from "fastify";
 import fastify from "fastify";
-import { authMiddleware, requireAuth } from "./middleware/auth";
+import { authMiddleware } from "./middleware/auth";
 import { authRoutes } from "./routes/auth";
 import { taskRoutes } from "./routes/tasks";
 
