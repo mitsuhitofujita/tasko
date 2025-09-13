@@ -33,7 +33,7 @@ Implementation notes and clarifications
   - Delete (trash): either implement soft delete (`deletedAt` timestamp or `archived`) or a permanent delete depending on policy; the models document recommends soft-delete using an `archived` flag for safety.
 
 - Accessibility
-  - Ensure keyboard support: inline editing should be focusable, actions reachable by keyboard, and drag-and-drop should have a keyboard alternative for reordering (e.g., move up/down buttons).
+  - Ensure keyboard support: inline editing should be focusable, actions reachable by keyboard.
   - Provide ARIA attributes for drag handles and action buttons.
 
 - Styling

@@ -54,7 +54,7 @@ export async function taskRoutes(fastify: FastifyInstance) {
 						});
 					}
 				});
-				
+
 				// Sort by order in ascending order
 				tasks.sort((a, b) => a.order - b.order);
 

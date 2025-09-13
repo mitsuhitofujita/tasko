@@ -199,10 +199,10 @@ function Dashboard({
 
 		// Calculate new order value (smaller values = higher position)
 		let newOrder: number;
-		
+
 		// Get the target position after the drag operation
 		const sortedTasks = [...tasks].sort((a, b) => a.order - b.order);
-		
+
 		if (draggedIndex < targetIndex) {
 			// Moving down: place after target task
 			if (targetIndex === tasks.length - 1) {
