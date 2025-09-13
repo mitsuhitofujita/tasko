@@ -13,15 +13,25 @@ class AuditLogger {
 		},
 	): Promise<void> {
 		try {
-			const auditLog: AuditLog = {
+			const auditLog: Partial<AuditLog> = {
 				event,
-				userId: options.userId,
-				sessionId: options.sessionId,
 				ipHash: this.hashIp(options.ipAddress),
-				userAgent: options.userAgent,
 				timestamp: new Date(),
-				metadata: options.metadata,
 			};
+
+			// Only add fields that are not undefined
+			if (options.userId !== undefined) {
+				auditLog.userId = options.userId;
+			}
+			if (options.sessionId !== undefined) {
+				auditLog.sessionId = options.sessionId;
+			}
+			if (options.userAgent !== undefined) {
+				auditLog.userAgent = options.userAgent;
+			}
+			if (options.metadata !== undefined) {
+				auditLog.metadata = options.metadata;
+			}
 
 			await db.collection("audit_logs").add(auditLog);
 		} catch (error) {
