@@ -34,3 +34,16 @@ export interface AuditLog {
 	timestamp: Date;
 	metadata?: Record<string, unknown>;
 }
+
+export interface Task {
+	taskId: string;
+	userId: string;
+	title: string;
+	description?: string;
+	completed: boolean;
+	priority: boolean;
+	archived: boolean;
+	order: number;
+	createdAt: Date;
+	updatedAt: Date;
+}
