@@ -51,6 +51,7 @@ export class GoogleAuthService {
 			nonce,
 			code_challenge: pkce.codeChallenge,
 			code_challenge_method: "S256",
+			// biome-ignore lint/suspicious/noExplicitAny: google-auth-library の型定義が PKCE (OAuth 2.1) パラメータをサポートしていないため、セキュリティ上必要な code_challenge と code_challenge_method を渡すために any を使用
 		} as any);
 
 		return { url, state };

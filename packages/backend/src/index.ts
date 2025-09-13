@@ -6,6 +6,7 @@ import type { FastifyReply } from "fastify";
 import fastify from "fastify";
 import { authMiddleware, requireAuth } from "./middleware/auth";
 import { authRoutes } from "./routes/auth";
+import { taskRoutes } from "./routes/tasks";
 
 const server = fastify();
 
@@ -19,6 +20,9 @@ server.register(fastifyCors, {
 // Register auth routes
 server.register(authRoutes);
 
+// Register task routes
+server.register(taskRoutes);
+
 // Apply auth middleware globally for protected routes
 server.addHook("preHandler", authMiddleware);
 
@@ -26,20 +30,6 @@ server.addHook("preHandler", authMiddleware);
 server.get("/ping", async (_request, _reply) => {
 	return "pong\n";
 });
-
-// Protected dashboard route
-server.get(
-	"/dashboard",
-	{ preHandler: requireAuth },
-	async (_request, reply) => {
-		reply.type("text/html");
-		if (reply.sendFile) {
-			reply.sendFile("index.html");
-		} else {
-			reply.send("index.html");
-		}
-	},
-);
 
 // Serve frontend static files (SPA) from packages/frontend/dist
 const distPath = path.join(__dirname, "..", "..", "frontend", "dist");
