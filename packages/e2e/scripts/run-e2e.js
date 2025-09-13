@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 const sleep = promisify(setTimeout);
 
 let serverProcess = null;
+let firestoreEmulatorProcess = null;
 
 async function runCommand(command, args = [], options = {}) {
 	return new Promise((resolve, reject) => {
@@ -27,6 +28,40 @@ async function runCommand(command, args = [], options = {}) {
 	});
 }
 
+async function startFirestoreEmulator() {
+	return new Promise((resolve, reject) => {
+		console.log("Starting Firestore emulator...");
+		firestoreEmulatorProcess = spawn("gcloud", [
+			"emulators",
+			"firestore",
+			"start",
+			"--host-port=0.0.0.0:8080"
+		], {
+			stdio: "pipe",
+			env: {
+				...process.env,
+			},
+		});
+
+		firestoreEmulatorProcess.stdout.on("data", (data) => {
+			const output = data.toString();
+			console.log(output);
+			if (output.includes("Dev App Server is now running")) {
+				resolve();
+			}
+		});
+
+		firestoreEmulatorProcess.stderr.on("data", (data) => {
+			console.error(data.toString());
+		});
+
+		firestoreEmulatorProcess.on("error", reject);
+
+		// Fallback: resolve after 10 seconds if no specific message is found
+		setTimeout(resolve, 10000);
+	});
+}
+
 async function startServer() {
 	return new Promise((resolve, reject) => {
 		console.log("Starting server...");
@@ -36,6 +71,7 @@ async function startServer() {
 			env: {
 				...process.env,
 				NODE_ENV: "test",
+				FIRESTORE_EMULATOR_HOST: "localhost:8080",
 			},
 		});
 
@@ -69,8 +105,38 @@ function stopServer() {
 	}
 }
 
+function stopFirestoreEmulator() {
+	if (firestoreEmulatorProcess) {
+		console.log("Stopping Firestore emulator...");
+		
+		// First try graceful termination
+		firestoreEmulatorProcess.kill("SIGTERM");
+		
+		// Wait a bit and then force kill if still running
+		setTimeout(() => {
+			if (firestoreEmulatorProcess && !firestoreEmulatorProcess.killed) {
+				console.log("Force killing Firestore emulator...");
+				firestoreEmulatorProcess.kill("SIGKILL");
+			}
+		}, 2000);
+		
+		firestoreEmulatorProcess = null;
+	}
+	
+	// Also kill any remaining firestore processes
+	try {
+		spawn("pkill", ["-f", "cloud-firestore-emulator"], { stdio: "ignore" });
+	} catch {
+		// Ignore errors from pkill
+	}
+}
+
 async function main() {
 	try {
+		console.log("Starting Firestore emulator...");
+		await startFirestoreEmulator();
+		await sleep(2000); // Give emulator extra time to fully start
+
 		console.log("Building frontend...");
 		await runCommand("pnpm", ["--filter", "frontend", "build"], {
 			cwd: "../..",
@@ -93,6 +159,7 @@ async function main() {
 		process.exit(1);
 	} finally {
 		stopServer();
+		stopFirestoreEmulator();
 	}
 }
 
@@ -100,12 +167,14 @@ async function main() {
 process.on("SIGINT", () => {
 	console.log("Received SIGINT, cleaning up...");
 	stopServer();
+	stopFirestoreEmulator();
 	process.exit(0);
 });
 
 process.on("SIGTERM", () => {
 	console.log("Received SIGTERM, cleaning up...");
 	stopServer();
+	stopFirestoreEmulator();
 	process.exit(0);
 });
 
