@@ -33,6 +33,10 @@ async function startServer() {
 		serverProcess = spawn("node", ["dist/index.js"], {
 			cwd: "../../packages/backend",
 			stdio: "pipe",
+			env: {
+				...process.env,
+				NODE_ENV: "test",
+			},
 		});
 
 		serverProcess.stdout.on("data", (data) => {
