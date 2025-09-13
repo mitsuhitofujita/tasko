@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import "./App.css";
 
 interface User {
 	userId: string;
@@ -84,7 +83,7 @@ function App() {
 
 	if (loading) {
 		return (
-			<div style={{ textAlign: "center", padding: "2rem" }}>
+			<div className="text-center p-8">
 				<p>Loading...</p>
 			</div>
 		);
@@ -99,45 +98,24 @@ function App() {
 		}
 
 		return (
-			<div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
-				<h1>Dashboard</h1>
-				<div
-					style={{
-						border: "1px solid #ddd",
-						borderRadius: "8px",
-						padding: "1.5rem",
-						backgroundColor: "#f9f9f9",
-					}}
-				>
-					<div
-						style={{
-							display: "flex",
-							alignItems: "center",
-							gap: "1rem",
-							marginBottom: "1rem",
-						}}
-					>
+			<div className="p-8 max-w-xl mx-auto">
+				<h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+				<div className="border border-gray-300 rounded-lg p-6 bg-gray-50">
+					<div className="flex items-center gap-4 mb-4">
 						<img
 							src={user.picture}
 							alt="Profile"
-							style={{ width: "64px", height: "64px", borderRadius: "50%" }}
+							className="w-16 h-16 rounded-full"
 						/>
 						<div>
-							<h2 style={{ margin: 0 }}>{user.name}</h2>
-							<p style={{ margin: "0.25rem 0", color: "#666" }}>{user.email}</p>
+							<h2 className="text-xl font-semibold m-0">{user.name}</h2>
+							<p className="text-gray-600 m-0 mt-1">{user.email}</p>
 						</div>
 					</div>
 					<button
 						type="button"
 						onClick={handleLogout}
-						style={{
-							backgroundColor: "#dc3545",
-							color: "white",
-							border: "none",
-							padding: "0.5rem 1rem",
-							borderRadius: "4px",
-							cursor: "pointer",
-						}}
+						className="bg-red-600 text-white border-none px-4 py-2 rounded cursor-pointer hover:bg-red-700 transition-colors"
 					>
 						Logout
 					</button>
@@ -147,56 +125,33 @@ function App() {
 	}
 
 	return (
-		<div style={{ textAlign: "center", padding: "2rem" }}>
-			<h1>Tasko</h1>
+		<div className="text-center p-8">
+			<h1 className="text-4xl font-bold mb-8">Tasko</h1>
 
 			{error && (
-				<div
-					style={{
-						color: "#dc3545",
-						padding: "1rem",
-						marginBottom: "1rem",
-						backgroundColor: "#f8d7da",
-						border: "1px solid #f5c6cb",
-						borderRadius: "4px",
-					}}
-				>
+				<div className="text-red-700 p-4 mb-4 bg-red-100 border border-red-300 rounded">
 					{error}
 				</div>
 			)}
 
 			{user ? (
 				<div>
-					<p>Welcome back, {user.name}!</p>
+					<p className="mb-4">Welcome back, {user.name}!</p>
 					<a
 						href="/dashboard"
-						style={{
-							display: "inline-block",
-							backgroundColor: "#007bff",
-							color: "white",
-							padding: "0.75rem 1.5rem",
-							textDecoration: "none",
-							borderRadius: "4px",
-							marginTop: "1rem",
-						}}
+						className="inline-block bg-blue-600 text-white px-6 py-3 no-underline rounded mt-4 hover:bg-blue-700 transition-colors"
 					>
 						Go to Dashboard
 					</a>
 				</div>
 			) : (
 				<div>
-					<p>A simple task management application</p>
+					<p className="mb-6 text-gray-600">
+						A simple task management application
+					</p>
 					<a
 						href="/api/auth/google/login"
-						style={{
-							display: "inline-block",
-							backgroundColor: "#db4437",
-							color: "white",
-							padding: "0.75rem 1.5rem",
-							textDecoration: "none",
-							borderRadius: "4px",
-							marginTop: "1rem",
-						}}
+						className="inline-block bg-red-600 text-white px-6 py-3 no-underline rounded mt-4 hover:bg-red-700 transition-colors"
 					>
 						Sign in with Google
 					</a>
