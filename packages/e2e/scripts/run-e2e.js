@@ -31,17 +31,16 @@ async function runCommand(command, args = [], options = {}) {
 async function startFirestoreEmulator() {
 	return new Promise((resolve, reject) => {
 		console.log("Starting Firestore emulator...");
-		firestoreEmulatorProcess = spawn("gcloud", [
-			"emulators",
-			"firestore",
-			"start",
-			"--host-port=0.0.0.0:8080"
-		], {
-			stdio: "pipe",
-			env: {
-				...process.env,
+		firestoreEmulatorProcess = spawn(
+			"gcloud",
+			["emulators", "firestore", "start", "--host-port=0.0.0.0:8080"],
+			{
+				stdio: "pipe",
+				env: {
+					...process.env,
+				},
 			},
-		});
+		);
 
 		firestoreEmulatorProcess.stdout.on("data", (data) => {
 			const output = data.toString();
@@ -114,7 +113,7 @@ function stopServer() {
 		}
 		serverProcess = null;
 	}
-	
+
 	// Also kill any remaining processes on port 3000
 	try {
 		spawn("pkill", ["-f", "node.*3000"], { stdio: "ignore" });
@@ -126,11 +125,11 @@ function stopServer() {
 function stopFirestoreEmulator() {
 	if (firestoreEmulatorProcess) {
 		console.log("Stopping Firestore emulator...");
-		
+
 		try {
 			// First try graceful termination
 			firestoreEmulatorProcess.kill("SIGTERM");
-			
+
 			// Wait a bit and then force kill if still running
 			setTimeout(() => {
 				if (firestoreEmulatorProcess && !firestoreEmulatorProcess.killed) {
@@ -141,10 +140,10 @@ function stopFirestoreEmulator() {
 		} catch (error) {
 			console.warn("Error stopping Firestore emulator:", error.message);
 		}
-		
+
 		firestoreEmulatorProcess = null;
 	}
-	
+
 	// Also kill any remaining firestore processes
 	try {
 		spawn("pkill", ["-f", "cloud-firestore-emulator"], { stdio: "ignore" });
@@ -158,27 +157,36 @@ function stopFirestoreEmulator() {
 async function clearFirestoreData() {
 	try {
 		console.log("Clearing Firestore data...");
-		
+
 		// Try using the test API endpoint first (more reliable)
 		try {
-			const response = await fetch("http://localhost:3000/api/test-auth/clear-all-data", {
-				method: "DELETE",
-			});
-			
+			const response = await fetch(
+				"http://localhost:3000/api/test-auth/clear-all-data",
+				{
+					method: "DELETE",
+				},
+			);
+
 			if (response.ok) {
 				const result = await response.json();
 				console.log("Test data cleared via API:", result.message);
 				return;
 			}
 		} catch (apiError) {
-			console.warn("API cleanup failed, trying emulator REST API...", apiError.message);
+			console.warn(
+				"API cleanup failed, trying emulator REST API...",
+				apiError.message,
+			);
 		}
-		
+
 		// Fallback to emulator REST API
-		const response = await fetch("http://localhost:8080/emulator/v1/projects/tasko-test/databases/(default)/documents", {
-			method: "DELETE",
-		});
-		
+		const response = await fetch(
+			"http://localhost:8080/emulator/v1/projects/tasko-test/databases/(default)/documents",
+			{
+				method: "DELETE",
+			},
+		);
+
 		if (response.ok) {
 			console.log("Firestore data cleared via emulator API");
 		} else {
@@ -192,7 +200,7 @@ async function clearFirestoreData() {
 
 async function main() {
 	let exitCode = 0;
-	
+
 	try {
 		console.log("Starting Firestore emulator...");
 		await startFirestoreEmulator();
@@ -225,10 +233,10 @@ async function main() {
 		console.log("Cleaning up processes...");
 		stopServer();
 		stopFirestoreEmulator();
-		
+
 		// Wait a bit for cleanup to complete
 		await sleep(1000);
-		
+
 		if (exitCode !== 0) {
 			process.exit(exitCode);
 		}

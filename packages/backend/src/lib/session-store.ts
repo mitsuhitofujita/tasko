@@ -131,9 +131,11 @@ class SessionStore {
 	}
 
 	async deleteUserSessions(userId: string): Promise<void> {
-		const sessionsQuery = db.collection("sessions").where("userId", "==", userId);
+		const sessionsQuery = db
+			.collection("sessions")
+			.where("userId", "==", userId);
 		const sessionsSnapshot = await sessionsQuery.get();
-		
+
 		const batch = db.batch();
 		sessionsSnapshot.docs.forEach((doc) => {
 			// Remove from cache
@@ -141,7 +143,7 @@ class SessionStore {
 			// Add to batch delete
 			batch.delete(doc.ref);
 		});
-		
+
 		await batch.commit();
 	}
 

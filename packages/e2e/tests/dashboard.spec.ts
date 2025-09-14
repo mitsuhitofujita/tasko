@@ -40,7 +40,9 @@ test.describe("Dashboard", () => {
 		).toBeVisible();
 	});
 
-	test("should show empty task list message when no tasks exist", async ({ page }) => {
+	test("should show empty task list message when no tasks exist", async ({
+		page,
+	}) => {
 		await page.goto("/dashboard");
 
 		// Wait for the dashboard to load
@@ -54,15 +56,17 @@ test.describe("Dashboard", () => {
 		).toBeVisible();
 	});
 
-	test("should create and manage tasks through complete workflow", async ({ page }) => {
+	test("should create and manage tasks through complete workflow", async ({
+		page,
+	}) => {
 		await page.goto("/dashboard");
-		
+
 		// Verify we start with empty state (cleanup was done in beforeEach)
 		await expect(page.locator("text=No tasks yet!")).toBeVisible();
-		
+
 		const taskInput = page.locator('input[placeholder*="Add a new task"]');
 		const addButton = page.locator('button:has-text("➕ Add")');
-		
+
 		// Wait for input to be ready
 		await expect(taskInput).toBeVisible();
 		await expect(addButton).toBeVisible();
@@ -87,17 +91,20 @@ test.describe("Dashboard", () => {
 		await expect(taskItems).toHaveCount(2);
 
 		// Test 3: Edit a task
-		const firstTask = page.locator("li").filter({ hasText: "Test Task 1" }).first();
+		const firstTask = page
+			.locator("li")
+			.filter({ hasText: "Test Task 1" })
+			.first();
 		// Click on the task title span to start editing
 		await firstTask.locator("span", { hasText: "Test Task 1" }).click();
-		
+
 		// Wait for edit input to appear and verify it's visible
 		const editInput = page.locator('input[type="text"]').first();
 		await expect(editInput).toBeVisible();
 		await editInput.clear();
 		await editInput.fill("Edited Task 1");
 		await editInput.press("Enter");
-		
+
 		// Wait for edit to complete and verify
 		await expect(page.locator("text=Edited Task 1")).toBeVisible();
 		await expect(page.locator("text=Test Task 1")).not.toBeVisible();
@@ -105,18 +112,22 @@ test.describe("Dashboard", () => {
 		// Test 4: Mark task as complete
 		const editedTask = page.locator("li").filter({ hasText: "Edited Task 1" });
 		await editedTask.hover();
-		const completeButton = editedTask.locator('button[title*="Mark as complete"]');
+		const completeButton = editedTask.locator(
+			'button[title*="Mark as complete"]',
+		);
 		await completeButton.click();
-		
+
 		// Verify task is marked as complete (opacity reduced)
 		await expect(editedTask).toHaveClass(/opacity-60/);
 
 		// Test 5: Mark as priority
 		const secondTask = page.locator("li").filter({ hasText: "Test Task 2" });
 		await secondTask.hover();
-		const priorityButton = secondTask.locator('button[title*="Mark as priority"]');
+		const priorityButton = secondTask.locator(
+			'button[title*="Mark as priority"]',
+		);
 		await priorityButton.click();
-		
+
 		// Verify task has priority styling (yellow background)
 		await expect(secondTask).toHaveClass(/bg-yellow-50/);
 
@@ -124,7 +135,7 @@ test.describe("Dashboard", () => {
 		await secondTask.hover();
 		const archiveButton = secondTask.locator('button[title*="Archive task"]');
 		await archiveButton.click();
-		
+
 		// Task should be archived (still visible but marked as archived)
 		// Note: Current implementation doesn't hide archived tasks
 		await expect(page.locator("text=Test Task 2")).toBeVisible();
@@ -133,7 +144,7 @@ test.describe("Dashboard", () => {
 		await editedTask.hover();
 		const deleteButton = editedTask.locator('button[title*="Delete task"]');
 		await deleteButton.click();
-		
+
 		// Verify task is deleted
 		await expect(page.locator("text=Edited Task 1")).not.toBeVisible();
 		// Note: Empty state won't show because archived task still exists
@@ -152,14 +163,14 @@ test.describe("Dashboard", () => {
 
 	test("should support task drag and drop reordering", async ({ page }) => {
 		await page.goto("/dashboard");
-		
+
 		// Wait for dashboard to load
 		await expect(page.locator("h1")).toContainText("Test User");
-		
+
 		// Clear any existing tasks first by deleting them
 		let existingTasks = page.locator("ul li");
 		let taskCount = await existingTasks.count();
-		
+
 		// Delete all existing tasks
 		while (taskCount > 0) {
 			const task = existingTasks.first();
@@ -167,7 +178,7 @@ test.describe("Dashboard", () => {
 			const deleteButton = task.locator('button[title*="Delete task"]');
 			await deleteButton.click();
 			await page.waitForTimeout(500); // Wait for delete to process
-			
+
 			existingTasks = page.locator("ul li");
 			taskCount = await existingTasks.count();
 		}
@@ -194,7 +205,7 @@ test.describe("Dashboard", () => {
 		// Perform drag and drop reordering (drag first task to second position)
 		const firstTaskItem = page.locator("li").filter({ hasText: "Second Task" });
 		const secondTaskItem = page.locator("li").filter({ hasText: "First Task" });
-		
+
 		await firstTaskItem.dragTo(secondTaskItem);
 
 		// Verify reordering occurred (order should change)

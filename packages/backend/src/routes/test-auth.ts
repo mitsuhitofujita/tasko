@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { db } from "../config/firestore";
 import { sessionStore } from "../lib/session-store";
 import { authMiddleware } from "../middleware/auth";
-import { db } from "../config/firestore";
 
 export async function testAuthRoutes(fastify: FastifyInstance) {
 	if (process.env.NODE_ENV !== "test") {
@@ -103,17 +103,17 @@ export async function testAuthRoutes(fastify: FastifyInstance) {
 				// Clear user's tasks only
 				const tasksQuery = db.collection("tasks").where("userId", "==", userId);
 				const tasksSnapshot = await tasksQuery.get();
-				
+
 				const batch = db.batch();
 				tasksSnapshot.docs.forEach((doc) => {
 					batch.delete(doc.ref);
 				});
 				await batch.commit();
 
-				reply.send({ 
-					success: true, 
+				reply.send({
+					success: true,
 					deletedTasks: tasksSnapshot.docs.length,
-					message: `Cleared ${tasksSnapshot.docs.length} tasks for user ${userId}`
+					message: `Cleared ${tasksSnapshot.docs.length} tasks for user ${userId}`,
 				});
 			} catch (error) {
 				console.error("Test task cleanup error:", error);
@@ -139,7 +139,7 @@ export async function testAuthRoutes(fastify: FastifyInstance) {
 				// Clear user's tasks
 				const tasksQuery = db.collection("tasks").where("userId", "==", userId);
 				const tasksSnapshot = await tasksQuery.get();
-				
+
 				const batch = db.batch();
 				tasksSnapshot.docs.forEach((doc) => {
 					batch.delete(doc.ref);
@@ -149,10 +149,10 @@ export async function testAuthRoutes(fastify: FastifyInstance) {
 				// Clear user's sessions
 				await sessionStore.deleteUserSessions(userId);
 
-				reply.send({ 
-					success: true, 
+				reply.send({
+					success: true,
 					deletedTasks: tasksSnapshot.docs.length,
-					message: `Cleared data for user ${userId}`
+					message: `Cleared data for user ${userId}`,
 				});
 			} catch (error) {
 				console.error("Test data cleanup error:", error);
@@ -190,12 +190,12 @@ export async function testAuthRoutes(fastify: FastifyInstance) {
 				});
 				await sessionsBatch.commit();
 
-				reply.send({ 
-					success: true, 
+				reply.send({
+					success: true,
 					deletedTasks: tasksSnapshot.docs.length,
 					deletedUsers: usersSnapshot.docs.length,
 					deletedSessions: sessionsSnapshot.docs.length,
-					message: "Cleared all test data"
+					message: "Cleared all test data",
 				});
 			} catch (error) {
 				console.error("Test data cleanup error:", error);
