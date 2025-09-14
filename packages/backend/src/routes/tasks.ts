@@ -38,21 +38,19 @@ export async function taskRoutes(fastify: FastifyInstance) {
 				const tasks: Task[] = [];
 				snapshot.forEach((doc) => {
 					const data = doc.data();
-					// Filter out archived tasks
-					if (data.archived !== true) {
-						tasks.push({
-							taskId: doc.id,
-							userId,
-							title: data.title,
-							description: data.description,
-							completed: data.completed || false,
-							priority: data.priority || false,
-							archived: data.archived || false,
-							order: data.order || 0,
-							createdAt: data.createdAt?.toDate() || new Date(),
-							updatedAt: data.updatedAt?.toDate() || new Date(),
-						});
-					}
+					// Include all tasks (archived and non-archived)
+					tasks.push({
+						taskId: doc.id,
+						userId,
+						title: data.title,
+						description: data.description,
+						completed: data.completed || false,
+						priority: data.priority || false,
+						archived: data.archived || false,
+						order: data.order || 0,
+						createdAt: data.createdAt?.toDate() || new Date(),
+						updatedAt: data.updatedAt?.toDate() || new Date(),
+					});
 				});
 
 				// Sort by order in ascending order
