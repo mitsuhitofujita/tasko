@@ -7,6 +7,7 @@ import fastify from "fastify";
 import { authMiddleware } from "./middleware/auth";
 import { authRoutes } from "./routes/auth";
 import { taskRoutes } from "./routes/tasks";
+import { testAuthRoutes } from "./routes/test-auth";
 
 const server = fastify();
 
@@ -22,6 +23,9 @@ server.register(authRoutes);
 
 // Register task routes
 server.register(taskRoutes);
+
+// Register test auth routes (only in test environment)
+server.register(testAuthRoutes);
 
 // Apply auth middleware globally for protected routes
 server.addHook("preHandler", authMiddleware);
