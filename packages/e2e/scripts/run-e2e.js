@@ -100,8 +100,26 @@ async function startServer() {
 function stopServer() {
 	if (serverProcess) {
 		console.log("Stopping server...");
-		serverProcess.kill("SIGTERM");
+		try {
+			serverProcess.kill("SIGTERM");
+			// Force kill after 3 seconds if still running
+			setTimeout(() => {
+				if (serverProcess && !serverProcess.killed) {
+					console.log("Force killing server...");
+					serverProcess.kill("SIGKILL");
+				}
+			}, 3000);
+		} catch (error) {
+			console.warn("Error stopping server:", error.message);
+		}
 		serverProcess = null;
+	}
+	
+	// Also kill any remaining processes on port 3000
+	try {
+		spawn("pkill", ["-f", "node.*3000"], { stdio: "ignore" });
+	} catch {
+		// Ignore errors from pkill
 	}
 }
 
@@ -109,16 +127,20 @@ function stopFirestoreEmulator() {
 	if (firestoreEmulatorProcess) {
 		console.log("Stopping Firestore emulator...");
 		
-		// First try graceful termination
-		firestoreEmulatorProcess.kill("SIGTERM");
-		
-		// Wait a bit and then force kill if still running
-		setTimeout(() => {
-			if (firestoreEmulatorProcess && !firestoreEmulatorProcess.killed) {
-				console.log("Force killing Firestore emulator...");
-				firestoreEmulatorProcess.kill("SIGKILL");
-			}
-		}, 2000);
+		try {
+			// First try graceful termination
+			firestoreEmulatorProcess.kill("SIGTERM");
+			
+			// Wait a bit and then force kill if still running
+			setTimeout(() => {
+				if (firestoreEmulatorProcess && !firestoreEmulatorProcess.killed) {
+					console.log("Force killing Firestore emulator...");
+					firestoreEmulatorProcess.kill("SIGKILL");
+				}
+			}, 2000);
+		} catch (error) {
+			console.warn("Error stopping Firestore emulator:", error.message);
+		}
 		
 		firestoreEmulatorProcess = null;
 	}
@@ -126,12 +148,51 @@ function stopFirestoreEmulator() {
 	// Also kill any remaining firestore processes
 	try {
 		spawn("pkill", ["-f", "cloud-firestore-emulator"], { stdio: "ignore" });
+		spawn("pkill", ["-f", "firestore"], { stdio: "ignore" });
+		spawn("pkill", ["-f", "java.*8080"], { stdio: "ignore" });
 	} catch {
 		// Ignore errors from pkill
 	}
 }
 
+async function clearFirestoreData() {
+	try {
+		console.log("Clearing Firestore data...");
+		
+		// Try using the test API endpoint first (more reliable)
+		try {
+			const response = await fetch("http://localhost:3000/api/test-auth/clear-all-data", {
+				method: "DELETE",
+			});
+			
+			if (response.ok) {
+				const result = await response.json();
+				console.log("Test data cleared via API:", result.message);
+				return;
+			}
+		} catch (apiError) {
+			console.warn("API cleanup failed, trying emulator REST API...", apiError.message);
+		}
+		
+		// Fallback to emulator REST API
+		const response = await fetch("http://localhost:8080/emulator/v1/projects/tasko-test/databases/(default)/documents", {
+			method: "DELETE",
+		});
+		
+		if (response.ok) {
+			console.log("Firestore data cleared via emulator API");
+		} else {
+			console.warn("Failed to clear Firestore data via emulator API");
+		}
+	} catch (error) {
+		console.warn("Error clearing Firestore data:", error.message);
+		// Continue anyway as this is not critical for test execution
+	}
+}
+
 async function main() {
+	let exitCode = 0;
+	
 	try {
 		console.log("Starting Firestore emulator...");
 		await startFirestoreEmulator();
@@ -150,16 +211,27 @@ async function main() {
 		await startServer();
 		await sleep(2000); // Give server extra time to fully start
 
+		// Clear test data after server is running
+		await clearFirestoreData();
+
 		console.log("Running E2E tests...");
 		await runCommand("npx", ["playwright", "test"]);
 
 		console.log("E2E tests completed successfully!");
 	} catch (error) {
 		console.error("E2E workflow failed:", error.message);
-		process.exit(1);
+		exitCode = 1;
 	} finally {
+		console.log("Cleaning up processes...");
 		stopServer();
 		stopFirestoreEmulator();
+		
+		// Wait a bit for cleanup to complete
+		await sleep(1000);
+		
+		if (exitCode !== 0) {
+			process.exit(exitCode);
+		}
 	}
 }
 
