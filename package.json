@@ -6,6 +6,7 @@
 	"scripts": {
 		"check": "pnpm -r check",
 		"build": "pnpm -r build",
+		"dev": "pnpm --filter frontend build && pnpm --filter backend dev",
 		"e2e": "pnpm --filter e2e test"
 	},
 	"keywords": [],
